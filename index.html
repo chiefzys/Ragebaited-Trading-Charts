@@ -746,14 +746,15 @@ async function loadSymbol(sym){
 }
 
 /* ================= boot ================= */
-// Block pinch zoom on the chart only — page stays recoverable elsewhere
+// Page zoom is never useful here: block pinch + double-tap zoom everywhere,
+// but never swallow taps on interactive elements
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>
-  surface.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
-let lastTouchEnd=0;
-surface.addEventListener('touchend',e=>{
+  document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+let lastTapT=0;
+document.addEventListener('touchend',e=>{
   const now=Date.now();
-  if(now-lastTouchEnd<300) e.preventDefault();   // kill double-tap zoom on chart
-  lastTouchEnd=now;
+  if(now-lastTapT<300 && !e.target.closest('button,input,select,a,.wrow,.seg')) e.preventDefault();
+  lastTapT=now;
 },{passive:false});
 window.addEventListener('error',e=>{
   try{
